@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 public class AppLogger {
     private static final String NAME = "Senku";
-    private static final Logger LOGGER = LogManager.getLogger(NAME);
+    public static Logger LOGGER = LogManager.getLogger(NAME);
 
     // API for strict decoupling
     public static Logger getLogger() {
