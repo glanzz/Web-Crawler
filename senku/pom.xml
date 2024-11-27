@@ -4,34 +4,34 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>senku</artifactId>
+    <groupId>com.senku</groupId>
+    <artifactId>crawler</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.18.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version> <!-- Use a compatible version -->
+        </dependency>
+        <dependency>
+            <groupId>net.htmlparser.jericho</groupId>
+            <artifactId>jericho-html</artifactId>
+            <version>3.4</version>
+        </dependency>
+
+    </dependencies>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-    <dependency>
-        <groupId>org.jsoup</groupId>
-        <artifactId>jsoup</artifactId>
-        <version>1.18.1</version>
-    </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents.client5</groupId>
-                <artifactId>httpclient5</artifactId>
-                <version>5.2</version>
-            </dependency>
-            <dependency>
-                <groupId>net.htmlparser.jericho</groupId>
-                <artifactId>jericho-html</artifactId>
-                <version>3.4</version>
-            </dependency>
 
-        </dependencies>
-    </dependencyManagement>
 
 </project>

@@ -1,13 +1,10 @@
-package crawler;
+package com.senku.crawler;
+import com.senku.crawler.parser.Parser;
+import com.senku.crawler.structures.Page;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
-
-import java.util.*;
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.*;
 
 
 
@@ -15,8 +12,8 @@ public class Senku {
     private static final int MAXIMUM_CONNECTIONS = 100;
     private static final int MAXIMUM_CONNECTIONS_PER_ROUTE = 20;
     private static final int CONNECTION_TIME_OUT = 5000;
-    private final PoolingHttpClientConnectionManager connectionPool;
-    private final CloseableHttpClient httpClient;
+    private PoolingHttpClientConnectionManager connectionPool;
+    private CloseableHttpClient httpClient;
 
     private void initializeConnectionPool() {
         connectionPool = new PoolingHttpClientConnectionManager();
@@ -36,7 +33,7 @@ public class Senku {
                 .setConnectTimeout(CONNECTION_TIME_OUT)
                 .setSocketTimeout(CONNECTION_TIME_OUT)
                 .build();
-        httpClient = HttpClients.custom()
+        this.httpClient = HttpClients.custom()
                 .setConnectionManager(connectionPool)
                 .setDefaultRequestConfig(httpClientConfig)
                 .build();
@@ -46,10 +43,25 @@ public class Senku {
         initializeHttpClient();
     }
 
+    public void start() {
+        Parser parser = new Parser(httpClient);
+        Page page = new Page("https://northeastern.edu");
+        System.out.println(page);
+        try {
+            parser.parsePage(page);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to parse page");
+        }
+
+        System.out.println(page);
+        page.getChildren().forEach(child -> System.out.println(child.getUrlString()));
+    }
+
 
     public static void main(String[] args) {
         Senku senku = new Senku();
-
+        senku.start();
     }
 
 
