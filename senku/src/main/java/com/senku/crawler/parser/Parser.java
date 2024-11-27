@@ -22,7 +22,7 @@ public class Parser {
     }
 
 
-    private String fetchContents(URI url) throws IOException {
+    String fetchContents(URI url) throws IOException {
         HttpGet request = new HttpGet(url);
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() == 200) {
