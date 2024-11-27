@@ -33,4 +33,4 @@ jobs:
 
       # Step 4: Run Maven test
       - name: Run Maven Tests
-        run: mvn test
+        run: cd senku && mvn test
