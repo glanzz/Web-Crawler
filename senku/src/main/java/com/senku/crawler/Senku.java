@@ -1,6 +1,7 @@
 package com.senku.crawler;
 import com.senku.crawler.parser.Parser;
 import com.senku.crawler.structures.Page;
+import com.senku.crawler.utils.AppLogger;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -44,8 +45,10 @@ public class Senku {
     }
 
     public void start() {
+        AppLogger.getLogger().info("Starting to parse...");
         Parser parser = new Parser(httpClient);
         Page page = new Page("https://northeastern.edu");
+
         System.out.println(page);
         try {
             parser.parsePage(page);
@@ -56,6 +59,7 @@ public class Senku {
 
         System.out.println(page);
         page.getChildren().forEach(child -> System.out.println(child.getUrlString()));
+        AppLogger.getLogger().info("Parsing complete.");
     }
 
 

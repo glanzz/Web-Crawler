@@ -58,7 +58,7 @@ public class Parser {
                     }
                     links.add(fullUrl);
                 } catch (Exception e) {
-                    AppLogger.getLogger().info("Failed to extract links from " + href, e);
+                    AppLogger.getLogger().info("Failed to extract links from " + href);
                 }
             }
         }
