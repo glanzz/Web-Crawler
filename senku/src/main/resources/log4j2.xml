@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns="https://logging.apache.org/xml/ns"
+               xsi:schemaLocation="
+               https://logging.apache.org/xml/ns
+               https://logging.apache.org/xml/ns/log4j-config-2.xsd
+  ">
+    <Appenders>
+        <Console name="CONSOLE">
+            <JsonTemplateLayout/>
+        </Console>
+        <File name="File" fileName="logs/crawler.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.senku" level="INFO"/>
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Root>
+    </Loggers>
+</Configuration>

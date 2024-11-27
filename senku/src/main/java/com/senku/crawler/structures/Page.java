@@ -1,5 +1,7 @@
 package com.senku.crawler.structures;
 
+import com.senku.crawler.utils.AppLogger;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,8 +76,9 @@ public class Page {
             this.status = status;
             return;
         }
+        AppLogger.getLogger().error("Invalid status update:", status, "from", this.status, ":",this.url);
         throw new Exception("Invalid Status");
-        //TODO: Log invalid status added
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.senku.crawler.parser;
 
+import com.senku.crawler.utils.AppLogger;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -42,7 +43,7 @@ public class Parser {
             String href = tag.getAttributeValue("href");
             if (href != null) {
                 try {
-                    String fullUrl =  href;
+                    String fullUrl;
                     if (href.startsWith("/")) {
                         URI baseURI = new URI(baseUrl);
                         URI relativeURI = new URI(href);
@@ -51,11 +52,13 @@ public class Parser {
                         try {
                             fullUrl = new URI(href).toURL().toString();
                         }  catch (MalformedURLException e) {
-                            //TODO: Log: Invalid URL
+                            AppLogger.getLogger().info("Invalid URL found: Base URL", baseUrl, ", HREF:", href);
+                            continue;
                         }
                     }
                     links.add(fullUrl);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    AppLogger.getLogger().info("Failed to extract links from " + href, e);
                 }
             }
         }
@@ -68,6 +71,7 @@ public class Parser {
          If allowed parse the content from the connection pool
          */
         page.updateStatus(Page.STATUS.PROCESSING);
+
         URI url = page.getURI();
         String pageContent = this.fetchContents(url);
         List<String> links = this.extractLinks(pageContent, page.getUrlString());
@@ -75,6 +79,7 @@ public class Parser {
             Page child = new Page(link);
             page.addChild(child);
         });
+
         page.setVisitedOn(new Date());
         page.updateStatus(Page.STATUS.COMPLETED);
     }
