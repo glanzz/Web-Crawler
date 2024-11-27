@@ -10,7 +10,7 @@ import java.net.URI;
 
 
 public class Page {
-    public static enum STATUS {
+    public enum STATUS {
         PENDING, PROCESSING, COMPLETED
     }
 
@@ -26,24 +26,18 @@ public class Page {
         this.setUrl(url);
     }
 
-    
-
-    public String getUrlString() {
-        return url;
+    private void setUrl(String url) {
+        /*Private method as URL is unique and should only be set when object is initialized*/
+        this.url = url;
     }
     public URI getURI() throws URISyntaxException {
-        if (this.urlObj == null) {
-            this.urlObj = new URI(url);
-        }
+        if (this.urlObj == null)  this.urlObj = new URI(url); // Lazy loading
         return this.urlObj;
     }
 
 
-    private void setUrl(String url) {
-        /*
-         Private method as URL is unique and should only be set when object is initialized
-         */
-        this.url = url;
+    public String getUrlString() {
+        return url;
     }
     public Date getVisitedOn() {
         return visitedOn;
@@ -57,6 +51,9 @@ public class Page {
     public void setRank(int rank) {
         this.rank = rank;
     }
+    public STATUS getStatus() {
+        return status;
+    }
     public List<Page> getChildren() {
         return this.children;
     }
@@ -64,21 +61,19 @@ public class Page {
         this.children.add(child);
     }
 
-    public STATUS getStatus() {
-        return status;
-    }
-
     public void updateStatus(STATUS status) throws Exception {
-        if (status == STATUS.PROCESSING && this.status == STATUS.PENDING) {
-            this.status = status;
-            return;
-        } else if (status == STATUS.COMPLETED &&  this.status == STATUS.PROCESSING) {
+        if (this.status == status) return;
+
+        if (
+                (status == STATUS.PROCESSING && this.status == STATUS.PENDING) ||
+                        (status == STATUS.COMPLETED &&  this.status == STATUS.PROCESSING)
+        ) {
             this.status = status;
             return;
         }
+
         AppLogger.getLogger().error("Invalid status update:", status, "from", this.status, ":",this.url);
         throw new Exception("Invalid Status");
-
     }
 
     @Override
