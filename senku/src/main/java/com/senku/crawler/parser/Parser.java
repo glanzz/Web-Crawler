@@ -56,6 +56,7 @@ public class Parser {
                             continue;
                         }
                     }
+                    //TODO: Check if it is duplicate
                     links.add(fullUrl);
                 } catch (Exception e) {
                     AppLogger.getLogger().info("Failed to extract links from " + href);
@@ -66,9 +67,9 @@ public class Parser {
     }
 
     public void parsePage(Page page) throws Exception {
-        /*
-         Check robots.txt file and cache it
-         If allowed parse the content from the connection pool
+        /**
+         * Check robots.txt file and cache it
+         * If allowed parse the content from the connection pool
          */
         page.updateStatus(Page.STATUS.PROCESSING);
 
@@ -76,8 +77,8 @@ public class Parser {
         String pageContent = this.fetchContents(url);
         List<String> links = this.extractLinks(pageContent, page.getUrlString());
         links.forEach(link -> {
-            Page child = new Page(link);
-            page.addChild(child);
+                Page child = new Page(link);
+                page.addChild(child);
         });
 
         page.setVisitedOn(new Date());
