@@ -1,5 +1,7 @@
 package com.senku.crawler.parser;
 
+
+import com.senku.crawler.structures.KnownURLMemory;
 import com.senku.crawler.utils.AppLogger;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -13,14 +15,27 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.senku.crawler.structures.Page;
 
 public class Parser {
     CloseableHttpClient httpClient;
+    ReentrantLock lookupLock;
+    KnownURLMemory memory;
     public Parser(CloseableHttpClient httpClient) {
         this.httpClient = httpClient;
+        this.lookupLock = new ReentrantLock();
+        memory = new KnownURLMemory();
     }
 
+    private static String standardUrl(String url) {
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        url = url.toLowerCase();
+        return url;
+    }
 
     String fetchContents(URI url) throws IOException {
         HttpGet request = new HttpGet(url);
@@ -50,20 +65,53 @@ public class Parser {
                         fullUrl = baseURI.resolve(relativeURI).toString();
                     } else {
                         try {
-                            fullUrl = new URI(href).toURL().toString();
+                            fullUrl = new URI(href).normalize().toURL().toString();
                         }  catch (MalformedURLException e) {
                             AppLogger.getLogger().info("Invalid URL found: Base URL", baseUrl, ", HREF:", href);
                             continue;
                         }
                     }
-                    //TODO: Check if it is duplicate
-                    links.add(fullUrl);
+                    links.add(standardUrl(fullUrl));
                 } catch (Exception e) {
                     AppLogger.getLogger().info("Failed to extract links from " + href);
                 }
             }
         }
         return links;
+    }
+
+    private void populateUnseenLinks(List<String> links, Page page) {
+        boolean taskCompleted = false;
+        while (!taskCompleted) {
+            boolean available = lookupLock.tryLock();
+            if (available) {
+                lookupLock.lock();
+                try {
+                    links.forEach(link -> {
+                        if (!memory.isKnown(link)) {
+                            Page child = new Page(link);
+                            page.addChild(child);
+                            memory.addAsKnown(link);
+                        }
+                    });
+                }
+                catch (Exception e) {
+                    AppLogger.getLogger().info("Interrupted", e);
+                }
+                finally {
+                    lookupLock.unlock();
+                }
+                taskCompleted = true;
+            }
+            else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    AppLogger.getLogger().info("Interrupted thread", e);
+                }
+            }
+
+        }
     }
 
     public void parsePage(Page page) throws Exception {
@@ -76,11 +124,7 @@ public class Parser {
         URI url = page.getURI();
         String pageContent = this.fetchContents(url);
         List<String> links = this.extractLinks(pageContent, page.getUrlString());
-        links.forEach(link -> {
-                Page child = new Page(link);
-                page.addChild(child);
-        });
-
+        populateUnseenLinks(links, page);
         page.setVisitedOn(new Date());
         page.updateStatus(Page.STATUS.COMPLETED);
     }

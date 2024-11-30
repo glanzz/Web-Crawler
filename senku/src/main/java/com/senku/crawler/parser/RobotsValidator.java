@@ -1,6 +1,6 @@
 package com.senku.crawler.parser;
 
-import com.senku.crawler.structures.AppStats;
+import com.senku.crawler.utils.AppStats;
 import com.senku.crawler.utils.AppConstants;
 import com.senku.crawler.utils.AppLogger;
 import crawlercommons.robots.BaseRobotRules;
