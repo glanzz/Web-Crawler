@@ -1,7 +1,7 @@
 package com.senku.crawler.parser;
 
 import com.senku.crawler.BaseTest;
-import com.senku.crawler.utils.AppStats;
+import com.senku.crawler.structures.AppStats;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
