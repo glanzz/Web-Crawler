@@ -138,7 +138,7 @@ public class Senku {
         try {
             AppLogger.getLogger().info("Starting to parse...");
             this.parser = new Parser(httpClient);
-            priorityQueue.add(new Page("https://raghebm56.wixsite.com/mraghebportfolio"));
+            priorityQueue.add(new Page("https://northeastern.edu"));
 
             // Start the crawling tasks
             CompletableFuture<Void> crawlTasks = crawlInParallel();//urlQueue);
