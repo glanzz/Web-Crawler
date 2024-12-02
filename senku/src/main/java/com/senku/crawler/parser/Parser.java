@@ -12,7 +12,6 @@ import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,10 +48,10 @@ public class Parser {
         }
     }
 
-    public List<String> extractLinks(String htmlContent, String baseUrl) {
+    public Map<String, Integer> extractLinks(String htmlContent, String baseUrl) {
         Source source = new Source(htmlContent);
         List<StartTag> anchorTags = source.getAllStartTags("a");
-        List<String> links = new ArrayList<>();
+        HashMap<String, Integer> links = new HashMap<>();
 
         for (StartTag tag : anchorTags) {
             String href = tag.getAttributeValue("href");
@@ -66,12 +65,18 @@ public class Parser {
                     } else {
                         try {
                             fullUrl = new URI(href).normalize().toURL().toString();
-                        }  catch (MalformedURLException e) {
+                        }  catch (Exception e) {
                             AppLogger.getLogger().info("Invalid URL found: Base URL", baseUrl, ", HREF:", href);
                             continue;
                         }
                     }
-                    links.add(standardUrl(fullUrl));
+                    // Track number of links to the new URL
+                    String newUrl = standardUrl(fullUrl);
+                    if(links.containsKey(newUrl)) {
+                        links.put(newUrl, links.get(newUrl) + 1);
+                    } else {
+                        links.put(newUrl, 1);
+                    }
                 } catch (Exception e) {
                     AppLogger.getLogger().info("Failed to extract links from " + href);
                 }
@@ -80,38 +85,27 @@ public class Parser {
         return links;
     }
 
-    private void populateUnseenLinks(List<String> links, Page page) {
-        boolean taskCompleted = false;
-        while (!taskCompleted) {
-            boolean available = lookupLock.tryLock();
-            if (available) {
-                lookupLock.lock();
+    private void populateUnseenLinks(Map<String, Integer> links, Page page) {
+            lookupLock.lock();
+                System.out.println(links.size());
                 try {
-                    links.forEach(link -> {
+                    links.forEach((link, count) -> {
+                        Page child = new Page(link);
                         if (!memory.isKnown(link)) {
-                            Page child = new Page(link);
-                            page.addChild(child);
                             memory.addAsKnown(link);
+                        } else {
+                            child.setWasKnown(true);
                         }
+                        child.setTotalRefers(count);
+                        page.addChild(child);
                     });
                 }
                 catch (Exception e) {
-                    AppLogger.getLogger().info("Interrupted", e);
+                    AppLogger.getLogger().error("Interrupted", e);
                 }
                 finally {
                     lookupLock.unlock();
                 }
-                taskCompleted = true;
-            }
-            else {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    AppLogger.getLogger().info("Interrupted thread", e);
-                }
-            }
-
-        }
     }
 
     public void parsePage(Page page) throws Exception {
@@ -123,7 +117,7 @@ public class Parser {
 
         URI url = page.getURI();
         String pageContent = this.fetchContents(url);
-        List<String> links = this.extractLinks(pageContent, page.getUrlString());
+        Map<String, Integer> links = this.extractLinks(pageContent, page.getUrlString());
         populateUnseenLinks(links, page);
         page.setVisitedOn(new Date());
         page.updateStatus(Page.STATUS.COMPLETED);
