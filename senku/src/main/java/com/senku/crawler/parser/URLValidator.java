@@ -13,7 +13,9 @@ public class URLValidator {
         return lowercaseUrl.startsWith("http://") || lowercaseUrl.startsWith("https://");
     }
     private static boolean isFile(String url) {
-        String validFileExtensions = ".*\\.(png|jpg|jpeg|gif|pdf|txt|doc|docx|css|js|json|xml|mp4|zip|tar\\.gz)$";
+
+        String validFileExtensions = ".*\\.(png|jpg|jpeg|gif|pdf|txt|doc|docx|css|js|mp4|json|xml|zip|tar\\.gz)$";
+
         Pattern pattern = Pattern.compile(validFileExtensions, Pattern.CASE_INSENSITIVE);
 
         return pattern.matcher(url).matches();

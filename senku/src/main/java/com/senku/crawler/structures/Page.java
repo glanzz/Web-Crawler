@@ -18,8 +18,9 @@ public class Page {
     private int totalRefers;
     private URI urlObj = null;
     private Date visitedOn;
-    private int rank;
-    private List<Page> children = new ArrayList<>();
+    private int rank; // Number of unexplored children
+    private int totEdges; // Number of children
+    private final List<Page> children = new ArrayList<>();
     private STATUS status;
     private boolean wasKnown = false;
     private boolean hasRobots = false;
@@ -28,6 +29,7 @@ public class Page {
     public Page(String url) {
         this.status = STATUS.PENDING;
         this.setUrl(url);
+        this.totEdges = 0;
     }
 
     private void setUrl(String url) {
@@ -74,10 +76,7 @@ public class Page {
         this.visitedOn = visitedOn;
     }
     public int getRank() {
-        return rank;
-    }
-    public void setRank(int rank) {
-        this.rank = rank;
+        return this.children.size();
     }
     public STATUS getStatus() {
         return status;
@@ -85,7 +84,13 @@ public class Page {
     public List<Page> getChildren() {
         return this.children;
     }
+
+    public int getTotEdges() {
+        return this.totEdges;
+    }
+
     public void addChild(Page child) {
+        this.totEdges++;
         this.children.add(child);
     }
     public boolean wasKnown() {
@@ -111,7 +116,18 @@ public class Page {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Page) {
+            Page p = (Page) obj;
+            return this.url.equals(p.url);
+        }
+        return false;
+    }
+
+
+    @Override
     public String toString() {
         return "Page [url=" + url + ", visitedOn=" + visitedOn + ", rank=" + rank + ", status=" + status + "]";
     }
+
 }
