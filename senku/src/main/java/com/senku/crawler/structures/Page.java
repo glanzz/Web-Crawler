@@ -82,6 +82,16 @@ public class Page {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Page) {
+            Page p = (Page) obj;
+            return this.url.equals(p.url);
+        }
+        return false;
+    }
+
+
+    @Override
     public String toString() {
         return "Page [url=" + url + ", visitedOn=" + visitedOn + ", rank=" + rank + ", status=" + status + "]";
     }

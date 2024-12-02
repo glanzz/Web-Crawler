@@ -17,13 +17,13 @@ import java.util.Queue;
 import java.util.LinkedList;
 
 
-class SortbyRank implements Comparator<Page> {
+/*class SortbyRank implements Comparator<Page> {
     // Sorting in ascending order of rank
     public int compare(Page a, Page b)
     {
         return a.getRank() - b.getRank();
     }
-}
+}*/
 
 
 public class Senku {
