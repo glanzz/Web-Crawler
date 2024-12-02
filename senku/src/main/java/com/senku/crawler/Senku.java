@@ -2,7 +2,6 @@ package com.senku.crawler;
 import com.senku.crawler.parser.Parser;
 import com.senku.crawler.structures.Page;
 import com.senku.crawler.utils.AppLogger;
-import com.senku.crawler.structures.AppStats;
 //import org.apache.commons.collections.PriorityQueue;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
