@@ -15,12 +15,16 @@ public class Page {
     }
 
     private String url;
+    private int totalRefers;
     private URI urlObj = null;
     private Date visitedOn;
     private int rank; // Number of unexplored children
     private int totEdges; // Number of children
     private final List<Page> children = new ArrayList<>();
     private STATUS status;
+    private boolean wasKnown = false;
+    private boolean hasRobots = false;
+    private String modifiedAt = "";
 
     public Page(String url) {
         this.status = STATUS.PENDING;
@@ -35,6 +39,30 @@ public class Page {
     public URI getURI() throws URISyntaxException {
         if (this.urlObj == null)  this.urlObj = new URI(url); // Lazy loading
         return this.urlObj;
+    }
+
+    public int getTotalRefers() {
+        return totalRefers;
+    }
+
+    public void setTotalRefers(int totalRefers) {
+        this.totalRefers = totalRefers;
+    }
+
+    public boolean getHasRobots() {
+        return hasRobots;
+    }
+
+    public void setHasRobots(boolean hasRobots) {
+        this.hasRobots = hasRobots;
+    }
+
+    public String getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(String modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
 
@@ -64,6 +92,12 @@ public class Page {
     public void addChild(Page child) {
         this.totEdges++;
         this.children.add(child);
+    }
+    public boolean wasKnown() {
+        return wasKnown;
+    }
+    public void setWasKnown(boolean known) {
+        wasKnown = known;
     }
 
     public void updateStatus(STATUS status) throws Exception {
