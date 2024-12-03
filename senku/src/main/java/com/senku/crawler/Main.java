@@ -1,6 +1,7 @@
 package com.senku.crawler;
 
 import com.senku.crawler.structures.Page;
+import com.senku.crawler.utils.AppStats;
 
 public class Main {
     public static void main(String[] args) {
