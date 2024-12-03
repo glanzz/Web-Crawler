@@ -7,5 +7,8 @@ public class Main {
         Page start = new Page("https://www.northeastern.edu");
         WebCrawl crawler = new WebCrawl(start);
         crawler.crawl();
+
+        /* For Benchmarking */
+        //Runtime.getRuntime().addShutdownHook(new Thread(AppStats::printStats));
     }
 }
