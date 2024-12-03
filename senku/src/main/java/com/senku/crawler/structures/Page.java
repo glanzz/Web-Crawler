@@ -19,7 +19,6 @@ public class Page {
     private URI urlObj = null;
     private Date visitedOn;
     private int rank; // Number of unexplored children
-    private int totEdges; // Number of children
     private final List<Page> children = new ArrayList<>();
     private STATUS status;
     private boolean wasKnown = false;
@@ -29,7 +28,6 @@ public class Page {
     public Page(String url) {
         this.status = STATUS.PENDING;
         this.setUrl(url);
-        this.totEdges = 0;
     }
 
     private void setUrl(String url) {
@@ -76,8 +74,14 @@ public class Page {
         this.visitedOn = visitedOn;
     }
     public int getRank() {
-        return this.children.size();
+        return this.rank;
+        //return this.children.size();
     }
+
+    public void setRank(int num) {
+        this.rank = num;
+    }
+
     public STATUS getStatus() {
         return status;
     }
@@ -85,12 +89,11 @@ public class Page {
         return this.children;
     }
 
-    public int getTotEdges() {
-        return this.totEdges;
-    }
 
     public void addChild(Page child) {
-        this.totEdges++;
+        if (!child.wasKnown) {
+            rank++;
+        }
         this.children.add(child);
     }
     public boolean wasKnown() {

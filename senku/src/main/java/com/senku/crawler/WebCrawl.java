@@ -1,5 +1,6 @@
 package com.senku.crawler;
 
+import com.senku.crawler.db.Neo4jRepository;
 import com.senku.crawler.parser.Parser;
 import com.senku.crawler.parser.SafetyWall;
 import com.senku.crawler.structures.Page;
@@ -7,24 +8,17 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 class SortbyRank implements Comparator<Page> {
     // Sorting in ascending order of rank
     public int compare(Page a, Page b)
     {
-        return a.getRank() - b.getRank();
+        return b.getRank() - a.getRank();
     }
 }
 
@@ -38,7 +32,7 @@ public class WebCrawl {
     private final ExecutorService executor;
     private static final int NUM_THREADS = 8;
     private static final int MAX_DEPTH = 5;
-    private final Set<String> visited = new HashSet<>();
+    private int testDepth;
     private final PriorityQueue<Page> priorityQueue;
 
     private void initializeConnectionPool() {
@@ -66,32 +60,43 @@ public class WebCrawl {
         this.priorityQueue = new PriorityQueue(20, new SortbyRank());
         this.priorityQueue.add(startPage);
         this.parser = new Parser(httpClient);
+        this.testDepth = 0;
     }
 
     public void crawl() {
+        for(Object p:priorityQueue.toArray()){
+            Page curr = (Page)p;
+            System.out.println(curr.getUrlString() + ": " + curr.getRank());
+        }
+
         Page page = priorityQueue.poll();
-        while (page == null || visited.contains(page) || !SafetyWall.isSafe(page.getUrlString())) {
+        System.out.println(page);
+        while (page == null || !SafetyWall.isSafe(page.getUrlString())) { //|| visited.contains(page)
+            if (page == null) {
+                System.out.println("Queue is empty");
+                return;
+            }
             System.out.println("Skipped: " + page.getUrlString());
             page = priorityQueue.poll();
         }
-        crawl(page, 0);
+        testDepth++;
+        crawl(page, testDepth);
 
     }
 
     public void crawl(Page page, int depth) {
-        if (depth > MAX_DEPTH || visited.contains(page.getUrlString())) {
+        if (depth > MAX_DEPTH) {
             return;
         }
-        visited.add(page.getUrlString());
 
         CompletableFuture.supplyAsync(() -> page, executor)
                 .thenAccept(checkedPage -> {
                     if (checkedPage != null) {
                         System.out.println("Crawled: " + checkedPage.getUrlString());
-                        for (Page link : getChildren(checkedPage)) {
-                            if (!visited.contains(link.getUrlString())) {
+                        List<Page> children = getChildren(checkedPage);
+                        for (Page link : children) {//getChildren(checkedPage)) {
+                            if (!link.wasKnown()) {
                                 priorityQueue.add(link);
-                                //crawl(link, depth + 1);
                             }
                         }
                     }
@@ -106,6 +111,12 @@ public class WebCrawl {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to parse page");
+        }
+        try {
+            Neo4jRepository.addPage(page);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to add to Neo4j");
         }
         return page.getChildren();
     }
